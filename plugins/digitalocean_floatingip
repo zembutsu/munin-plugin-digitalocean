@@ -1,0 +1,40 @@
+#!/bin/bash
+# -*- sh -*-
+
+# DigitalOcean Floating IPs counter
+
+#%# family=contrib
+#%# capabilities=autoconf
+
+
+if [ "$1" = "autoconf" ]; then
+        echo yes
+    command -v doctl 2>/dev/null >/dev/null || result=1
+    if [ "$result" != "yes" ]; then
+        echo "no (need doctl)"
+            exit 0
+    fi
+    if ! doctl /dev/null $target; then
+        echo "no (Cannot run doctl)"
+        exit 0
+    fi
+    echo yes
+    exit 0
+fi
+
+if [ "$1" = "config" ] ; then
+        echo "graph_args -r --lower-limit 0 ";
+        echo "graph_title DigitalOcean Floating IPs Counter";
+        echo "graph_category DigitalOcean";
+        echo "graph_info How many flating ips am I using?";
+        echo 'graph_vlabel Floating IPs'
+
+        echo "ips.label IPs"
+        echo "ips.draw AREA"
+        echo "ips.type GAUGE"
+        exit
+fi
+
+echo -n "ips.value "
+doctl compute floating-ip list --no-header | wc -l
+

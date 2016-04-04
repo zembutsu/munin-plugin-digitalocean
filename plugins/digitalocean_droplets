@@ -1,0 +1,40 @@
+#!/bin/bash
+# -*- sh -*-
+
+# DigitalOcean doroplet counter
+
+#%# family=contrib
+#%# capabilities=autoconf
+
+
+if [ "$1" = "autoconf" ]; then
+        echo yes
+    command -v doctl 2>/dev/null >/dev/null || result=1
+    if [ "$result" != "yes" ]; then
+        echo "no (need doctl)"
+            exit 0
+    fi
+    if ! doctl /dev/null $target; then
+        echo "no (Cannot run doctl)"
+        exit 0
+    fi
+    echo yes
+    exit 0
+fi
+
+if [ "$1" = "config" ] ; then
+        echo "graph_args -r --lower-limit 0 ";
+        echo "graph_title DigitalOcean Dloplets Counter";
+        echo "graph_category DigitalOcean";
+        echo "graph_info How many droplets am I using?";
+        echo 'graph_vlabel droplets'
+
+        echo "droplet.label droplets"
+        echo "droplet.draw AREA"
+        echo "droplet.type GAUGE"
+        exit
+fi
+
+echo -n "droplet.value "
+doctl compute droplet list --no-header | wc -l
+
